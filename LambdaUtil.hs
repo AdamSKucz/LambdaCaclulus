@@ -1,7 +1,10 @@
 module LambdaUtil (
   foldLT,
   subsVar,
-  getNewVar
+  isAbsent,
+  variables,
+  getNewVar,
+  getNewVarExcept
 ) where 
 
 import Data.Set (Set, union, notMember)
@@ -28,5 +31,11 @@ allVars alphabet = [ c : s | s <- "" : allVars alphabet, c <- alphabet]
 auxVars :: [String]
 auxVars = allVars ['a'..'z']
 
+isAbsent :: Var -> LambdaTerm -> Bool
+isAbsent x = notMember x . variables
+
 getNewVar :: LambdaTerm -> Var
-getNewVar m = head . filter (`notMember` variables m) $ auxVars
+getNewVar m = head . filter (flip isAbsent m) $ auxVars
+
+getNewVarExcept :: Set Var -> Var
+getNewVarExcept ls = head . filter (`notElem` ls) $ auxVars

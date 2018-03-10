@@ -1,8 +1,15 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module LambdaTerms (
   alphaEquiv,
+  subs,
+  humanFriendlySubs,
   toBNF,
   betaEquiv
 ) where 
+
+import Control.Monad.State.Class (MonadState, gets, modify)
+import Control.Monad.State (evalState)
 
 import Data.Set (Set, (\\), union)
 import qualified Data.Set as Set
@@ -37,6 +44,29 @@ subs m x = subsMX
           where z = getNewVar (App m $ V x)
         subsMX (App n1 n2)  = App (subsMX n1) (subsMX n2)
 
+humanFriendlySubs :: LambdaTerm -> Var -> LambdaTerm -> LambdaTerm
+humanFriendlySubs m x n = evalState (subsMX n) (Set.singleton x `union` variables m `union` variables n)
+  where subsMX :: (MonadState (Set Var) m) => LambdaTerm -> m LambdaTerm
+        subsMX (V y)
+          | y == x          = return m
+          | otherwise       = return $ V y
+        subsMX (Lambda y n)
+          | y == x          = return $ Lambda y n
+          | isAbsent y m
+            || isAbsent x n = do
+              n' <- subsMX n
+              return $ Lambda y n'
+          | otherwise       = do
+              z <- gets getNewVarExcept
+              modify $ Set.insert z
+              n' <- subsMX $ subsVar z y n
+              return $ Lambda z n'
+          where z = getNewVar (App m $ V x)
+        subsMX (App n1 n2)  = do
+          n1' <- subsMX n1
+          n2' <- subsMX n2
+          return $ App n1' n2'
+        
 -- uses outer-most, left-most reduction order    
 oneStepBetaReduce :: LambdaTerm -> Maybe LambdaTerm
 oneStepBetaReduce (App (Lambda x m) n) 
