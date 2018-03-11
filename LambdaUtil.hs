@@ -12,6 +12,8 @@ import qualified Data.Set as Set
 
 import LambdaTypes
 
+import Debug.Trace (trace)
+
 foldLT :: (Var -> a) -> (Var -> a -> a) -> (a -> a -> a) -> LambdaTerm -> a
 foldLT v l a = vlaFoldLT
   where vlaFoldLT (V x)       = v x

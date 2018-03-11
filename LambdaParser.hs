@@ -1,8 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module LambdaParser (
-  fromString,
-  prettyPrint
+  fromString
 ) where
 
 import LambdaTypes
@@ -84,11 +83,3 @@ parse = evalStateT greedyParse
   
 fromString :: String -> Maybe LambdaTerm
 fromString = parse . tokenize
-
-prettyPrint :: LambdaTerm -> String
-prettyPrint = foldLT id processLambda processApp
-  where processLambda x s
-          | head s == lambda  = lambda : x ++ " " ++ tail s
-          | otherwise         = lambda : x ++ " . " ++ s
-        processApp s1 s2 = bracket s1 ++ " " ++ bracket s2
-          where bracket s = if ' ' `elem` s then "(" ++ s ++ ")" else s
