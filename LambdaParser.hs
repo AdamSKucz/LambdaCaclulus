@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module LambdaParser (
+  prettyShow,
   fromString
 ) where
 
@@ -19,6 +20,14 @@ import qualified Data.Set as Set
 
 lambda :: Char
 lambda = '\\'
+
+prettyShow :: LambdaTerm -> String
+prettyShow = foldLT id processLambda processApp
+  where processLambda x s
+          | head s == lambda  = lambda : x ++ " " ++ tail s
+          | otherwise         = lambda : x ++ " . " ++ s
+        processApp s1 s2 = bracket s1 ++ " " ++ bracket s2
+          where bracket s = if ' ' `elem` s then "(" ++ s ++ ")" else s
 
 lambdaChars :: Set Char
 lambdaChars = Set.fromList ['\\', 'λ']

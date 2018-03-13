@@ -2,8 +2,7 @@
 
 module LambdaInterface (
   humanFriendlySubs,
-  humanFriendlyBNF,
-  prettyShow
+  humanFriendlyBNF
 ) where 
 
 import Control.Monad.State.Class (MonadState, gets, modify)
@@ -18,9 +17,9 @@ import Data.Natural
 
 import LambdaTypes
 import LambdaUtil
-
 import LambdaTerms
 import LambdaComputability
+import LambdaParser
 
 -- TODO: rewrite as a makeHumanFriendly :: LambdaTerm -> LambdaTerm function
 
@@ -68,17 +67,6 @@ humanFriendlyBNF :: LambdaTerm -> LambdaTerm
 humanFriendlyBNF m = case hfOneStepBetaReduce m of
                       Just m' -> humanFriendlyBNF m'
                       Nothing -> m
-
-lambda :: Char
-lambda = '\\'
-
-prettyShow :: LambdaTerm -> String
-prettyShow = foldLT id processLambda processApp
-  where processLambda x s
-          | head s == lambda  = lambda : x ++ " " ++ tail s
-          | otherwise         = lambda : x ++ " . " ++ s
-        processApp s1 s2 = bracket s1 ++ " " ++ bracket s2
-          where bracket s = if ' ' `elem` s then "(" ++ s ++ ")" else s
 
 churchAsFunction :: LambdaTerm -> (a -> a) -> a -> a
 churchAsFunction (Lambda f' (Lambda x' l)) f x = go l

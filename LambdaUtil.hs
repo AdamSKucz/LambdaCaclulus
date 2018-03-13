@@ -3,11 +3,13 @@ module LambdaUtil (
   subsVar,
   isAbsent,
   variables,
+  getNewVarExcept,
   getNewVar,
-  getNewVarExcept
+  getNNewVars,
+  applyToAll
 ) where 
 
-import Data.Set (Set, union, notMember)
+import Data.Set (Set, union)
 import qualified Data.Set as Set
 
 import LambdaTypes
@@ -34,10 +36,19 @@ auxVars :: [String]
 auxVars = allVars ['a'..'z']
 
 isAbsent :: Var -> LambdaTerm -> Bool
-isAbsent x = notMember x . variables
+isAbsent x = notElem x . variables
 
-getNewVar :: LambdaTerm -> Var
-getNewVar m = head . filter (flip isAbsent m) $ auxVars
+getNNewVarsExcept :: Int -> Set Var -> [Var]
+getNNewVarsExcept n ls = take n . filter (`notElem` ls) $ auxVars
 
 getNewVarExcept :: Set Var -> Var
-getNewVarExcept ls = head . filter (`notElem` ls) $ auxVars
+getNewVarExcept = head . getNNewVarsExcept 1
+
+getNNewVars :: Int -> [LambdaTerm] -> [Var]
+getNNewVars m = getNNewVarsExcept m . foldr (union . variables) Set.empty
+
+getNewVar :: [LambdaTerm] -> Var
+getNewVar = head . getNNewVars 1
+
+applyToAll :: [LambdaTerm] -> LambdaTerm -> LambdaTerm
+applyToAll xs lt = foldl App lt xs

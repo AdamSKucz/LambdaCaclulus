@@ -26,7 +26,7 @@ alphaEquiv (V x) (V x')
   | x == x' = True
 alphaEquiv (Lambda x m) (Lambda y n)
   | subsVar z x m `alphaEquiv` subsVar z y n = True
-  where z = getNewVar (App m n)
+  where z = getNewVar [m,n]
 alphaEquiv (App m n) (App m' n')
   | m `alphaEquiv` m' && n `alphaEquiv` n' = True
 alphaEquiv _ _ = False
